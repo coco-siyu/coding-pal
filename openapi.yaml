@@ -1,0 +1,75 @@
+openapi: 3.1.0
+info:
+  title: Pairroom API
+  version: 1.0.0
+  description: HTTP contract. WebSocket messages are documented in docs/realtime-protocol.md.
+paths:
+  /api/health:
+    get:
+      summary: Check server availability
+      responses:
+        '200':
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    const: ok
+  /api/rooms:
+    post:
+      summary: Create a room
+      responses:
+        '201':
+          description: Created room
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Room'
+  /api/rooms/{id}:
+    get:
+      summary: Get a room
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^[a-f0-9]{24}$'
+      responses:
+        '200':
+          description: Room state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Room'
+        '404':
+          description: Room not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  schemas:
+    Room:
+      type: object
+      required: [id, code, language, revision, updatedAt]
+      properties:
+        id:
+          type: string
+        code:
+          type: string
+        language:
+          type: string
+          enum: [javascript, python]
+        revision:
+          type: integer
+        updatedAt:
+          type: string
+          format: date-time
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
